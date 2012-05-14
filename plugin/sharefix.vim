@@ -155,5 +155,16 @@ let s:filter = "has_key(v:val, 'owner') && v:val['owner'] {compare} a:owner"
 let s:owned_filter = substitute(s:filter, '{compare}', '==', '')
 let s:unowned_filter = substitute(s:filter, '{compare}', '!=', '')
 
+" export script scoped variables to unittest
+function! sharefix#__context__()
+  return { 'sid': s:SID, 'scope': s: }
+endfunction
+
+function! s:get_SID()
+  return matchstr(expand('<sfile>'), '<SNR>\d\+_')
+endfunction
+let s:SID = s:get_SID()
+delfunction s:get_SID
+
 let &cpo = s:save_cpo
 unlet s:save_cpo
