@@ -1,9 +1,18 @@
 " Description: sharefix stub generator for testing
 
-let s:sharefix = []
+if exists('g:loaded_sharefix_stub')
+    finish
+endif
+let g:loaded_sharefix_stub = 1
+
+let s:save_cpo = &cpo
+set cpo&vim
 
 " create test quickfix list for each owner
 function! SharefixStub(owners)
+    " temporary sharefix
+    let sharefix = []
+
     for owner in a:owners
         " generate random amount of stubs
         let stublist = []
@@ -18,11 +27,11 @@ function! SharefixStub(owners)
         call setqflist(stublist)
 
         " add owner to each quickfix and store in sharefix
-        call extend(s:sharefix, map(getqflist(), "extend(v:val, {'owner': owner}, 'error')"))
+        call extend(sharefix, map(getqflist(), "extend(v:val, {'owner': owner}, 'error')"))
     endfor
 
     " return sharefix to test
-    return copy(s:sharefix)
+    return copy(sharefix)
 endfunction
 
 " generate a random number
@@ -35,3 +44,6 @@ rnum = random.randint(low, high)
 vim.command('return {:d}'.format(rnum))
 endpython
 endfunction
+
+let &cpo = s:save_cpo
+unlet s:save_cpo

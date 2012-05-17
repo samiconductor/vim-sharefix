@@ -32,3 +32,8 @@ function! s:tc.test_owned()
     call self.assert_has_key('owner', owned[0])
     call self.assert_is('own', owned[0]['owner'])
 endfunction
+
+function! s:tc.teardown()
+    " clear quickfix list
+    call setqflist([])
+endfunction

@@ -20,3 +20,8 @@ function! s:tc.test_filtered()
     call self.assert_not(empty(filtered))
     call self.assert(empty(filter_fixes))
 endfunction
+
+function! s:tc.teardown()
+    " clear quickfix list
+    call setqflist([])
+endfunction
