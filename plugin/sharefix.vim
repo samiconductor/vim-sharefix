@@ -1,33 +1,33 @@
 " Purpose: share quickfix between commands
 
-if exists('g:loaded_sharedquickfix')
+if exists('g:loaded_sharefix')
     finish
 endif
-let g:loaded_sharedquickfix = 1
-
-" pad quickfix list height when displayed
-if !exists('g:sharedquickfix_padding')
-    let g:sharedquickfix_padding = 3
-endif
-
-" option to open quickfix list when not empty
-if !exists('g:sharedquickfix_auto_open')
-    let g:sharedquickfix_auto_open = 1
-endif
-
-" option to jump to first owned quickfix
-if !exists('g:sharedquickfix_jump_first')
-    let g:sharedquickfix_jump_first = 1
-endif
+let g:loaded_sharefix = 1
 
 let s:save_cpo = &cpo
 set cpo&vim
+
+" pad quickfix list height when displayed
+if !exists('g:sharefix_padding')
+    let g:sharefix_padding = 3
+endif
+
+" option to open quickfix list when not empty
+if !exists('g:sharefix_auto_open')
+    let g:sharefix_auto_open = 1
+endif
+
+" option to jump to first owned quickfix
+if !exists('g:sharefix_jump_first')
+    let g:sharefix_jump_first = 1
+endif
 
 " store quickfixes with owners
 let s:qflist = []
 
 " run a quickfix method and display errors or succes
-function! SharedQuickfix(owner, success, method, ...)
+function! Sharefix(owner, success, method, ...)
     " delay redrawing screen
     setlocal lazyredraw
 
@@ -44,7 +44,7 @@ function! SharedQuickfix(owner, success, method, ...)
     let qflist = s:Extended(a:owner)
 
     " display quicklist
-    if g:sharedquickfix_auto_open
+    if g:sharefix_auto_open
         call s:Display(qflist, a:owner)
     endif
 
@@ -67,9 +67,9 @@ endfunction
 
 " get quickfixes by owner
 " get all quickfixes with wildcard
-function! SharedQuickfixOwned(owner)
+function! SharefixOwned(owner)
     if a:owner == '*'
-        return deepcopy(s:qflist)
+        return copy(s:qflist)
     endif
 
     return s:Owned(s:qflist, a:owner)
@@ -77,7 +77,7 @@ endfunction
 
 " get quickfix list and filter out owner and close if empty
 " clear all with wildcard
-function! SharedQuickfixFiltered(owner)
+function! SharefixFiltered(owner)
     if a:owner == '*'
         let s:qflist = []
     else
@@ -91,16 +91,13 @@ function! SharedQuickfixFiltered(owner)
         cclose
     endif
 
-    return deepcopy(s:qflist)
+    return copy(s:qflist)
 endfunction
 
 " get old quickfix list extended with new quickfix list
 function! s:Extended(owner)
-    " get current quickfix list
-    let qflist = getqflist()
-
-    " add owner to each error
-    call s:Own(qflist, a:owner)
+    " add owner to each quickfix
+    let qflist = s:Own(getqflist(), a:owner)
 
     " append previous errors to new errors
     let s:qflist = qflist + s:Filtered(s:qflist, a:owner)
@@ -108,25 +105,23 @@ function! s:Extended(owner)
     " set quickfix list to old plus new
     call setqflist(s:qflist)
 
-    return deepcopy(s:qflist)
+    return copy(s:qflist)
 endfunction
 
 " get quickfix list with errors for this owner and
 " quickfixes without an owner filtered out
 function! s:Filtered(qflist, owner)
-    return filter(deepcopy(a:qflist), s:unowned_filter)
+    return filter(copy(a:qflist), s:unowned_filter)
 endfunction
 
 " get quickfixes by owner
 function! s:Owned(qflist, owner)
-    return filter(deepcopy(a:qflist), s:owned_filter)
+    return filter(copy(a:qflist), s:owned_filter)
 endfunction
 
 " add owner to each quickfix in list
 function! s:Own(qflist, owner)
-    for qf in a:qflist
-        call extend(qf, {'owner': a:owner}, 'error')
-    endfor
+    return map(copy(a:qflist), "extend(v:val, {'owner': a:owner}, 'error')")
 endfunction
 
 " display quickfix list
@@ -134,13 +129,13 @@ function! s:Display(qflist, owner)
     " show list if it contains errors
     if !empty(a:qflist)
         " pad quickfix height
-        let height = len(a:qflist) + g:sharedquickfix_padding
+        let height = len(a:qflist) + g:sharefix_padding
 
         " open it
         exec 'cclose | copen '.height
 
         " jump to first error if has owned errors
-        if g:sharedquickfix_jump_first && !empty(s:Owned(a:qflist, a:owner))
+        if g:sharefix_jump_first && !empty(s:Owned(a:qflist, a:owner))
             cc
         endif
 
