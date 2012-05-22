@@ -1,30 +1,17 @@
 " Description: sharefix stub generator for testing
 
-if exists('g:loaded_sharefix_stub')
-    finish
-endif
-let g:loaded_sharefix_stub = 1
-
-let s:save_cpo = &cpo
-set cpo&vim
-
 " create test quickfix list for each owner
-function! SharefixStub(owners)
+function! SharefixStub(...)
     " temporary sharefix
     let sharefix = []
+    let owners = a:000
 
-    for owner in a:owners
-        " generate random amount of stubs
-        let stublist = []
-        for index in range(1, s:RandomInt(1,9))
-            " fill in the required properties for quickfix
-            let filler = 'test'.index
-            let stub = {'filename': filler, 'pattern': filler}
-            call extend(stublist, [copy(stub)])
-        endfor
+    for owner in owners
+        " get random amount of stubs
+        let stubs = s:GenerateStubs(owner)
 
         " set quickfix to generate the rest of the quickfix properties
-        call setqflist(stublist)
+        call setqflist(stubs)
 
         " add owner to each quickfix and store in sharefix
         call extend(sharefix, map(getqflist(), "extend(v:val, {'owner': owner}, 'error')"))
@@ -32,6 +19,18 @@ function! SharefixStub(owners)
 
     " return sharefix to test
     return copy(sharefix)
+endfunction
+
+" generate random amount of stubs for owner
+function! s:GenerateStubs(owner)
+    let stubs = []
+    for index in range(1, s:RandomInt(1,9))
+        " fill in the required properties for quickfix
+        let filler = 'test'.index.': '.a:owner
+        let stub = {'filename': filler, 'pattern': filler}
+        call extend(stubs, [copy(stub)])
+    endfor
+    return stubs
 endfunction
 
 " generate a random number
@@ -44,6 +43,3 @@ rnum = random.randint(low, high)
 vim.command('return {:d}'.format(rnum))
 endpython
 endfunction
-
-let &cpo = s:save_cpo
-unlet s:save_cpo

@@ -8,7 +8,7 @@ function! s:tc.setup()
     call self.set('s:quickfix', getqflist())
 
     " create sharefix stub
-    call self.set('s:sharefix', SharefixStub(['test', 'own']))
+    call self.set('s:sharefix', SharefixStub('test', 'own'))
 endfunction
 
 function! s:tc.test_nothing_owned()

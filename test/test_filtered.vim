@@ -4,7 +4,7 @@ let s:tc = unittest#testcase#new('Filtered', sharefix#__context__())
 
 function! s:tc.setup()
     " create sharefix stub
-    call self.set('s:sharefix', SharefixStub(['test', 'filter']))
+    call self.set('s:sharefix', SharefixStub('test', 'filter'))
 endfunction
 
 function! s:tc.test_has_filter()
