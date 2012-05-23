@@ -24,22 +24,11 @@ endfunction
 " generate random amount of stubs for owner
 function! s:GenerateStubs(owner)
     let stubs = []
-    for index in range(1, s:RandomInt(1,9))
-        " fill in the required properties for quickfix
+    for index in range(1, 3)
+        " fill in the quickfix properties
         let filler = 'test'.index.': '.a:owner
-        let stub = {'filename': filler, 'pattern': filler}
+        let stub = {'filename': filler, 'pattern': filler, 'text': filler}
         call extend(stubs, [copy(stub)])
     endfor
     return stubs
-endfunction
-
-" generate a random number
-function! s:RandomInt(low, high)
-python << endpython
-import vim, random
-
-low, high = map(lambda s: int(s), vim.eval('[a:low, a:high]'))
-rnum = random.randint(low, high)
-vim.command('return {:d}'.format(rnum))
-endpython
 endfunction
