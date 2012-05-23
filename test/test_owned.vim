@@ -33,6 +33,14 @@ function! s:tc.test_owned()
     call self.assert_is('own', owned[0]['owner'])
 endfunction
 
+function! s:tc.test_own_error_text()
+    " assert error text prepended with owner
+    let owned_errors = self.call('s:OwnErrorText', [self.get('s:sharefix')])
+    for owned_error in owned_errors
+        call self.assert_match('^'.owned_error['owner'], owned_error['text'])
+    endfor
+endfunction
+
 function! s:tc.teardown()
     " clear quickfix list
     call setqflist([])

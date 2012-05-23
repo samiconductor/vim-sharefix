@@ -124,12 +124,24 @@ function! s:Own(qflist, owner)
     return map(copy(a:qflist), "extend(v:val, {'owner': a:owner}, 'error')")
 endfunction
 
+" prepend owner to error text
+function! s:OwnErrorText(sharefix_list)
+    let sharefix_list = copy(a:sharefix_list)
+    for sharefix in sharefix_list
+        let sharefix['text'] = sharefix['owner'].': '.sharefix['text']
+    endfor
+    return sharefix_list
+endfunction
+
 " display quickfix list
 function! s:Display(qflist, owner)
     " show list if it contains errors
     if !empty(a:qflist)
         " pad quickfix height
         let height = len(a:qflist) + g:sharefix_padding
+
+        " prepend owner to each error text
+        call setqflist(s:OwnErrorText(a:qflist))
 
         " open it
         exec 'cclose | copen '.height
