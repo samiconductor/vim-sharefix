@@ -24,7 +24,7 @@ if !exists('g:sharefix_jump_first')
 endif
 
 " store quickfixes with owners
-let s:qflist = []
+let s:sharefix_list = []
 
 " run a quickfix method and display errors or succes
 function! Sharefix(owner, success, method, ...)
@@ -41,11 +41,11 @@ function! Sharefix(owner, success, method, ...)
     endif
 
     " extend filtered quickfixes with new ones
-    let qflist = s:Extended(a:owner)
+    let sharefix_list = s:Extended(a:owner)
 
     " display quicklist
     if g:sharefix_auto_open
-        call s:Display(qflist, a:owner)
+        call s:Display(sharefix_list, a:owner)
     endif
 
     " redraw screen
@@ -57,71 +57,71 @@ function! Sharefix(owner, success, method, ...)
                 \ || type(a:success) != type('')
 
     " display success message if no quickfixes for this owner
-    if show && empty(s:Owned(qflist, a:owner))
+    if show && empty(s:Owned(sharefix_list, a:owner))
         highlight Passed ctermfg=green guifg=green
         echohl Passed | echon a:success | echohl None
     endif
 
-    return qflist
+    return sharefix_list
 endfunction
 
 " get quickfixes by owner
 " get all quickfixes with wildcard
 function! SharefixOwned(owner)
     if a:owner == '*'
-        return copy(s:qflist)
+        return copy(s:sharefix_list)
     endif
 
-    return s:Owned(s:qflist, a:owner)
+    return s:Owned(s:sharefix_list, a:owner)
 endfunction
 
 " get quickfix list and filter out owner and close if empty
 " clear all with wildcard
 function! SharefixFiltered(owner)
     if a:owner == '*'
-        let s:qflist = []
+        let s:sharefix_list = []
     else
-        call filter(s:qflist, s:unowned_filter)
+        call filter(s:sharefix_list, s:unowned_filter)
     endif
 
     " update the quickfix list
-    call setqflist(s:qflist)
+    call setqflist(s:sharefix_list)
 
-    if empty(s:qflist)
+    if empty(s:sharefix_list)
         cclose
     endif
 
-    return copy(s:qflist)
+    return copy(s:sharefix_list)
 endfunction
 
 " get old quickfix list extended with new quickfix list
 function! s:Extended(owner)
     " add owner to each quickfix
-    let qflist = s:Own(getqflist(), a:owner)
+    let sharefix_list = s:Own(getqflist(), a:owner)
 
     " append previous errors to new errors
-    let s:qflist = qflist + s:Filtered(s:qflist, a:owner)
+    let s:sharefix_list = sharefix_list + s:Filtered(s:sharefix_list, a:owner)
 
     " set quickfix list to old plus new
-    call setqflist(s:qflist)
+    call setqflist(s:sharefix_list)
 
-    return copy(s:qflist)
+    return copy(s:sharefix_list)
 endfunction
 
 " get quickfix list with errors for this owner and
 " quickfixes without an owner filtered out
-function! s:Filtered(qflist, owner)
-    return filter(copy(a:qflist), s:unowned_filter)
+function! s:Filtered(sharefix_list, owner)
+    return filter(copy(a:sharefix_list), s:unowned_filter)
 endfunction
 
 " get quickfixes by owner
-function! s:Owned(qflist, owner)
-    return filter(copy(a:qflist), s:owned_filter)
+function! s:Owned(sharefix_list, owner)
+    return filter(copy(a:sharefix_list), s:owned_filter)
 endfunction
 
 " add owner to each quickfix in list
-function! s:Own(qflist, owner)
-    return map(copy(a:qflist), "extend(v:val, {'owner': a:owner}, 'error')")
+function! s:Own(quickfix_list, owner)
+    return map(copy(a:quickfix_list), "extend(v:val, {'owner': a:owner}, 'error')")
 endfunction
 
 " prepend owner to error text
@@ -134,20 +134,20 @@ function! s:OwnErrorText(sharefix_list)
 endfunction
 
 " display quickfix list
-function! s:Display(qflist, owner)
+function! s:Display(sharefix_list, owner)
     " show list if it contains errors
-    if !empty(a:qflist)
+    if !empty(a:sharefix_list)
         " pad quickfix height
-        let height = len(a:qflist) + g:sharefix_padding
+        let height = len(a:sharefix_list + g:sharefix_padding
 
         " prepend owner to each error text
-        call setqflist(s:OwnErrorText(a:qflist))
+        call setqflist(s:OwnErrorText(a:sharefix_list))
 
         " open it
         exec 'cclose | copen '.height
 
         " jump to first error if has owned errors
-        if g:sharefix_jump_first && !empty(s:Owned(a:qflist, a:owner))
+        if g:sharefix_jump_first && !empty(s:Owned(a:sharefix_list, a:owner))
             cc
         endif
 
