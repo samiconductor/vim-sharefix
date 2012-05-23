@@ -1,6 +1,6 @@
 " Purpose: share quickfix between commands
 
-if exists('g:loaded_sharefix')
+if exists('g:loaded_sharefix_test')
     finish
 endif
 let g:loaded_sharefix = 1
@@ -66,18 +66,20 @@ function! Sharefix(owner, success, method, ...)
 endfunction
 
 " get quickfixes by owner
-" get all quickfixes with wildcard
+" get multiple owners with a wildcard glob
 function! SharefixOwned(owner)
-    if a:owner == '*'
-        return copy(s:sharefix_list)
-    endif
-
     return s:Owned(s:sharefix_list, a:owner)
 endfunction
 
-" get quickfix list and filter out owner and close if empty
-" clear all with wildcard
-function! SharefixFiltered(owner)
+" get quickfix list with owner filtered out
+" filter out multiple owners with a wildcard glob
+function! SharefixUnowned(owner)
+    return s:Unowned(s:sharefix_list, a:owner)
+endfunction
+
+" remove owner from sharefix list and close if empty
+" remove multiple with a wildcard glob
+function! SharefixClear(owner)
     if a:owner == '*'
         let s:sharefix_list = []
     else
@@ -100,7 +102,7 @@ function! s:Extended(owner)
     let sharefix_list = s:Own(getqflist(), a:owner)
 
     " append previous errors to new errors
-    let s:sharefix_list = sharefix_list + s:Filtered(s:sharefix_list, a:owner)
+    let s:sharefix_list = sharefix_list + s:Unowned(s:sharefix_list, a:owner)
 
     " set quickfix list to old plus new
     call setqflist(s:sharefix_list)
@@ -108,15 +110,14 @@ function! s:Extended(owner)
     return copy(s:sharefix_list)
 endfunction
 
-" get quickfix list with errors for this owner and
-" quickfixes without an owner filtered out
-function! s:Filtered(sharefix_list, owner)
-    return filter(copy(a:sharefix_list), s:unowned_filter)
-endfunction
-
 " get quickfixes by owner
 function! s:Owned(sharefix_list, owner)
     return filter(copy(a:sharefix_list), s:owned_filter)
+endfunction
+
+" get quickfixes that do not match owner
+function! s:Unowned(sharefix_list, owner)
+    return filter(copy(a:sharefix_list), s:unowned_filter)
 endfunction
 
 " add owner to each quickfix in list
@@ -138,7 +139,7 @@ function! s:Display(sharefix_list, owner)
     " show list if it contains errors
     if !empty(a:sharefix_list)
         " pad quickfix height
-        let height = len(a:sharefix_list + g:sharefix_padding
+        let height = len(a:sharefix_list) + g:sharefix_padding
 
         " prepend owner to each error text
         call setqflist(s:OwnErrorText(a:sharefix_list))

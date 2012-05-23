@@ -1,6 +1,6 @@
 " Description: test extending sharefix
 
-let s:tc = unittest#testcase#new('Filtered', sharefix#__context__())
+let s:tc = unittest#testcase#new('Extended', sharefix#__context__())
 
 function! s:tc.setup()
     " create sharefix stub
@@ -27,5 +27,5 @@ endfunction
 
 function! s:tc.teardown()
     " clear quickfix list
-    call SharefixFiltered('*')
+    call SharefixClear('*')
 endfunction
