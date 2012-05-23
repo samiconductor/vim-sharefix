@@ -1,6 +1,11 @@
 " Description: run all sharefix tests
 
 let test_dir = expand('<sfile>:p:h')
+let project_dir = expand('<sfile>:p:h:h')
+
+" reload plugin
+let g:sharefix_loaded = 0
+exec 'source '.project_dir.'/plugin/sharefix.vim'
 
 " source helpers
 for helper in glob(test_dir.'/helper/*', 0, 1)
