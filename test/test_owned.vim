@@ -5,21 +5,21 @@ let s:tc = unittest#testcase#new('Owned', sharefix#__context__())
 function! s:tc.setup()
     " create quickfix stub to own
     call setqflist([{'filename': 'own', 'pattern': 'own'}])
-    call self.set('s:quickfix', getqflist())
+    let s:quickfix_list = getqflist()
 
     " create sharefix stub
-    call self.set('s:sharefix', SharefixStub('test', 'own'))
+    let s:sharefix_test_list = SharefixStub('test', 'own')
 endfunction
 
 function! s:tc.test_nothing_owned()
     " assert nothing owned yet
-    let owned = self.call('s:Owned', [self.get('s:quickfix'), 'own'])
+    let owned = self.call('s:Owned', [s:quickfix_list, 'own'])
     call self.assert(empty(owned))
 endfunction
 
 function! s:tc.test_own()
     " assert owner assigned
-    let owned = self.call('s:Own', [self.get('s:quickfix'), 'own'])
+    let owned = self.call('s:Own', [s:quickfix_list, 'own'])
     call self.assert_not(empty(owned))
     call self.assert_has_key('owner', owned[0])
     call self.assert_is('own', owned[0]['owner'])
@@ -27,7 +27,7 @@ endfunction
 
 function! s:tc.test_owned()
     " make sure getting owned works
-    let owned = self.call('s:Owned', [self.get('s:sharefix'), 'own'])
+    let owned = self.call('s:Owned', [s:sharefix_test_list, 'own'])
     call self.assert_not(empty(owned))
     call self.assert_has_key('owner', owned[0])
     call self.assert_is('own', owned[0]['owner'])
@@ -35,7 +35,7 @@ endfunction
 
 function! s:tc.test_own_error_text()
     " assert error text prepended with owner
-    let owned_errors = self.call('s:OwnErrorText', [self.get('s:sharefix')])
+    let owned_errors = self.call('s:OwnErrorText', [s:sharefix_test_list])
     for owned_error in owned_errors
         call self.assert_match('^'.owned_error['owner'], owned_error['text'])
     endfor

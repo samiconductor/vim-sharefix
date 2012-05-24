@@ -13,7 +13,7 @@ function! s:tc.setup()
     cclose
 
     " create sharefix stub
-    call self.set('s:sharefix', SharefixStub('test'))
+    let s:sharefix_test_list = SharefixStub('test')
 endfunction
 
 function! s:tc.test_not_opened()
@@ -24,13 +24,13 @@ endfunction
 
 function! s:tc.test_opened()
     " assert sharefix opened when not empty
-    call self.call('s:Display', [self.get('s:sharefix'), 'test'])
+    call self.call('s:Display', [s:sharefix_test_list, 'test'])
     call self.assert(QuickbufExists())
 endfunction
 
 function! s:tc.test_close_empty_sharefix()
     " assert sharefix is closed when empty results
-    call self.call('s:Display', [self.get('s:sharefix'), 'test'])
+    call self.call('s:Display', [s:sharefix_test_list, 'test'])
     call self.call('s:Display', [[], 'test'])
     call self.assert_not(QuickbufExists())
 endfunction
@@ -41,6 +41,7 @@ function! s:tc.teardown()
 
     " clear quickfix list
     call setqflist([])
+    let s:sharefix_test_list = []
 endfunction
 
 function! s:tc.TEARDOWN()
