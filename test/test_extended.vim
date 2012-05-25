@@ -15,7 +15,7 @@ function! s:tc.test_extended()
     let extend_fix = SharefixStub('extend')
     let extended = self.call('s:Extended', ['extend'])
     let total_len = len(s:sharefix_test_list) + len(extend_fix)
-    call self.assert_equal(len(extended), total_len)
+    call self.assert_equal(total_len, len(extended))
 endfunction
 
 function! s:tc.test_unowned_remain()
