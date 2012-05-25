@@ -83,7 +83,7 @@ function! SharefixClear(owner)
     if a:owner == '*'
         let s:sharefix_list = []
     else
-        call filter(s:sharefix_list, s:unowned_filter)
+        call filter(s:sharefix_list, s:unowned_filter.'a:owner')
     endif
 
     " update the quickfix list
@@ -112,12 +112,40 @@ endfunction
 
 " get quickfixes by owner
 function! s:Owned(sharefix_list, owner)
-    return filter(copy(a:sharefix_list), s:owned_filter)
+    " get position of any wildcard
+    let glob_pos = match(a:owner, '*')
+
+    " remove the first wildcard
+    let owner = substitute(a:owner, '*', '', '')
+
+    " throw error if other wildcards
+    if match(owner, '*') >= 0
+        throw 'use at most one wildcard'
+    endif
+
+    if glob_pos < 0
+        " no glob found
+        let filter = s:owned_filter.'owner'
+    elseif glob_pos == 0 && len(owner) == 0
+        " match all - '*'
+        let filter = 1
+    elseif glob_pos == 0
+        " match end - '*owner'
+        let filter = s:match_owned_filter.'"'.owner.'$"'
+    elseif glob_pos == len(owner)
+        " match beginning - 'owner*'
+        let filter = s:match_owned_filter.'"^'.owner.'"'
+    else
+        " wildcard was not on either end
+        throw 'wildcard must be at the beginning or end of owner'
+    endif
+
+    return filter(copy(a:sharefix_list), filter)
 endfunction
 
 " get quickfixes that do not match owner
 function! s:Unowned(sharefix_list, owner)
-    return filter(copy(a:sharefix_list), s:unowned_filter)
+    return filter(copy(a:sharefix_list), s:unowned_filter.'a:owner')
 endfunction
 
 " add owner to each quickfix in list
@@ -159,9 +187,10 @@ function! s:Display(sharefix_list, owner)
 endfunction
 
 " filter strings
-let s:filter = "has_key(v:val, 'owner') && v:val['owner'] {compare} a:owner"
-let s:owned_filter = substitute(s:filter, '{compare}', '==', '')
-let s:unowned_filter = substitute(s:filter, '{compare}', '!=', '')
+let owner_filter = "has_key(v:val, 'owner') && v:val['owner'] {compare} "
+let s:owned_filter = substitute(owner_filter, '{compare}', '==', '')
+let s:unowned_filter = substitute(owner_filter, '{compare}', '!=', '')
+let s:match_owned_filter = substitute(owner_filter, '{compare}', '=~', '')
 
 " export script scoped variables to unittest
 function! sharefix#__context__()

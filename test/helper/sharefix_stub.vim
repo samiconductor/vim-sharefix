@@ -1,5 +1,7 @@
 " Description: sharefix stub generator for testing
 
+let g:sharefix_stub_len = 3
+
 " create test quickfix list for each owner
 function! SharefixStub(...)
     " temporary sharefix
@@ -24,7 +26,7 @@ endfunction
 " generate random amount of stubs for owner
 function! s:GenerateStubs(owner)
     let stubs = []
-    for index in range(1, 3)
+    for index in range(1, g:sharefix_stub_len)
         " fill in the quickfix properties
         let filler = 'test'.index.': '.a:owner
         let stub = {'filename': filler, 'pattern': filler, 'text': filler}
