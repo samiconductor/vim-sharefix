@@ -1,6 +1,6 @@
-" Description: test public commands
+" Description: test public owned command
 
-let s:tc = unittest#testcase#new('Public Methods', sharefix#__context__())
+let s:tc = unittest#testcase#new('Public Owned', sharefix#__context__())
 
 function! s:tc.setup()
     " create sharefix stub apply it to plugin's internal sharefix list
@@ -38,6 +38,7 @@ function! s:tc.test_suffix_glob()
 endfunction
 
 function! s:tc.test_odd_glob()
+    " pass in bad wildcards
     call self.assert_throw('wildcard', "call SharefixOwned('te*st')")
     call self.assert_throw('wildcard', "call SharefixOwned('*test*')")
     call self.assert_throw('wildcard', "call SharefixOwned('te*st*')")
@@ -45,12 +46,13 @@ function! s:tc.test_odd_glob()
 endfunction
 
 function! s:tc.test_empty_glob()
-    let nothing_owned = SharefixOwned('nothing*')
+    " search for an owner that does not exist
+    let nothing_owned = SharefixOwned('nothing')
     call self.assert_equal(0, len(nothing_owned))
 endfunction
 
 function! s:tc.teardown()
     " clear quickfix list and plugin's internal sharefix list
     call setqflist([])
-    call SharefixClear('*')
+    call SharefixClear()
 endfunction

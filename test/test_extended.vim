@@ -27,5 +27,5 @@ endfunction
 
 function! s:tc.teardown()
     " clear quickfix list
-    call SharefixClear('*')
+    call SharefixClear()
 endfunction
