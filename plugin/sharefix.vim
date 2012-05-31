@@ -1,4 +1,16 @@
-" Purpose: share quickfix between commands
+" Description:  Share quickfix list between commands and functions
+" Last Change:  05-31-2012
+" Version:      0.9.0
+" Maintainer:   Sam Simmons <sam@samiconductor.com>
+" License:      MIT License
+"
+" Copyright (c) 2012 Sam Simmons
+"
+" Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+"
+" The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+"
+" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 if exists('g:loaded_sharefix_test')
     finish
@@ -23,11 +35,20 @@ if !exists('g:sharefix_jump_first')
     let g:sharefix_jump_first = 1
 endif
 
+" option to hide warning messages
+if !exists('g:sharefix_hide_warnings')
+    let g:sharefix_hide_warnings = 0
+endif
+
 " store quickfixes with owners
 let s:sharefix_list = []
 
 " run a quickfix method and display errors or succes
 function! Sharefix(owner, success, method, ...)
+    if type(a:owner) != type('') || !len(a:owner)
+        return s:ErrorMsg('sharefix owner must be a non-empty string')
+    endif
+
     " delay redrawing screen
     setlocal lazyredraw
 
@@ -65,22 +86,52 @@ function! Sharefix(owner, success, method, ...)
     return sharefix_list
 endfunction
 
-" get quickfixes by owner
-" get multiple owners with a wildcard glob
-function! SharefixOwned(owner)
-    return s:Owned(s:sharefix_list, a:owner)
+" user commands
+if !exists(':SharefixFilter')
+    command -nargs=1 SharefixFilter :call s:SharefixFilter(<q-args>)
+endif
+
+if !exists(':SharefixRemove')
+    command -nargs=1 SharefixRemove :call s:SharefixRemove(<q-args>)
+endif
+
+if !exists(':SharefixClear')
+    command -nargs=0 SharefixClear :call s:SharefixRemove('*')
+endif
+
+" filter quickfixes down to matching owner
+" filter down to multiple owners with a wildcard glob
+function! s:SharefixFilter(owner)
+    let test = 'empty(l:sharefix_list)'
+    call s:SharefixModify(function('s:Owned'), test, a:owner, 'filtered')
 endfunction
 
-" get quickfix list with owner filtered out
-" filter out multiple owners with a wildcard glob
-function! SharefixUnowned(owner)
-    return s:Unowned(s:sharefix_list, a:owner)
+" remove quickfixes that match owner
+" remove multiple owners with a wildcard glob
+function! s:SharefixRemove(owner)
+    let test = 'len(l:sharefix_list) == len(s:sharefix_list)'
+    call s:SharefixModify(function('s:Unowned'), test, a:owner, 'removed')
 endfunction
 
-" remove owner from sharefix list and close if empty
-" remove multiple with a wildcard glob
-function! SharefixClear()
-    let s:sharefix_list = []
+" modify sharefix method helper
+function! s:SharefixModify(method, match_found, owner, done)
+    if empty(s:sharefix_list)
+        " warn attempt to filter an empty sharefix list
+        return s:WarningMsg('nothing '.a:done.' since sharefix list is empty')
+    endif
+
+    try
+        let l:sharefix_list = call(a:method, [s:sharefix_list, a:owner])
+    catch /wildcard/
+        return s:ErrorMsg(v:exception)
+    endtry
+
+    if eval(a:match_found)
+        " warn no matching owner found
+        return s:WarningMsg('no matching owner found for '.a:owner)
+    endif
+
+    call s:SetSharefix(l:sharefix_list)
 endfunction
 
 " get old quickfix list extended with new quickfix list
@@ -97,41 +148,32 @@ function! s:Extended(owner)
     return copy(s:sharefix_list)
 endfunction
 
-" get quickfixes by owner
-function! s:Owned(sharefix_list, owner)
-    return s:Filter(a:sharefix_list, a:owner, s:owned_filter, s:match_owned_filter)
-endfunction
-
-" get quickfixes that do not match owner
-function! s:Unowned(sharefix_list, owner)
-    return s:Filter(a:sharefix_list, a:owner, s:unowned_filter, s:match_unowned_filter)
-endfunction
-
 " add owner to each quickfix in list
 function! s:Own(quickfix_list, owner)
     return map(copy(a:quickfix_list), "extend(v:val, {'owner': a:owner}, 'error')")
 endfunction
 
-" prepend owner to error text
-function! s:OwnErrorText(sharefix_list)
-    let sharefix_list = copy(a:sharefix_list)
-    for sharefix in sharefix_list
-        let sharefix['text'] = sharefix['owner'].': '.sharefix['text']
-    endfor
-    return sharefix_list
+" get quickfixes by owner
+function! s:Owned(sharefix_list, owner)
+    return s:Filter(a:sharefix_list, a:owner, s:owned_filter, s:match_owned_filter, 1)
+endfunction
+
+" get quickfixes that do not match owner
+function! s:Unowned(sharefix_list, owner)
+    return s:Filter(a:sharefix_list, a:owner, s:unowned_filter, s:match_unowned_filter, 0)
 endfunction
 
 " filter list by owner
-function! s:Filter(sharefix_list, owner, exact_filter, match_filter)
+function! s:Filter(sharefix_list, owner, exact_filter, match_filter, all_filter)
     " get position of any wildcard
     let glob_pos = match(a:owner, '*')
 
     " remove the first wildcard
     let owner = substitute(a:owner, '*', '', '')
 
-    " throw error if other wildcards
+    " display error if more than one wildcard
     if match(owner, '*') >= 0
-        throw 'use at most one wildcard'
+        throw 'use at most one wildcard in the owner'
     endif
 
     if glob_pos < 0
@@ -139,7 +181,7 @@ function! s:Filter(sharefix_list, owner, exact_filter, match_filter)
         let filter = a:exact_filter.'owner'
     elseif glob_pos == 0 && len(owner) == 0
         " match all - '*'
-        let filter = 1
+        let filter = a:all_filter
     elseif glob_pos == 0
         " match end - '*owner'
         let filter = a:match_filter.'"'.owner.'$"'
@@ -175,6 +217,40 @@ function! s:Display(sharefix_list, owner)
     " else close quickfix list
     else
         cclose
+    endif
+endfunction
+
+" set sharefix list
+function! s:SetSharefix(sharefix_list)
+    let s:sharefix_list = a:sharefix_list
+
+    if !empty(s:sharefix_list)
+        " set quickfixes with owner names
+        call setqflist(s:OwnErrorText(s:sharefix_list))
+    else
+        " close quickfix list if sharefix empty
+        cclose
+    endif
+endfunction
+
+" prepend owner to error text
+function! s:OwnErrorText(sharefix_list)
+    let sharefix_list = copy(a:sharefix_list)
+    for sharefix in sharefix_list
+        let sharefix['text'] = sharefix['owner'].': '.sharefix['text']
+    endfor
+    return sharefix_list
+endfunction
+
+" print errors
+function! s:ErrorMsg(message)
+    echohl ErrorMsg | echon a:message | echohl None
+endfunction
+
+" print warnings
+function! s:WarningMsg(message)
+    if !g:sharefix_hide_warnings
+        echohl WarningMsg | echon a:message | echohl None
     endif
 endfunction
 
