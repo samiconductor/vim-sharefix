@@ -4,7 +4,7 @@ let test_dir = expand('<sfile>:p:h')
 let project_dir = expand('<sfile>:p:h:h')
 
 " reload plugin
-let g:sharefix_loaded = 0
+unlet g:loaded_sharefix
 exec 'source '.project_dir.'/plugin/sharefix.vim'
 
 " source helpers

@@ -28,7 +28,7 @@ function! s:GenerateStubs(owner)
     let stubs = []
     for index in range(1, g:sharefix_stub_len)
         " fill in the quickfix properties
-        let filler = 'test'.index.': '.a:owner
+        let filler = a:owner.index
         let stub = {'filename': filler, 'pattern': filler, 'text': filler}
         call extend(stubs, [copy(stub)])
     endfor
