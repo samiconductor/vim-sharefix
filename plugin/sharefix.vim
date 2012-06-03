@@ -237,7 +237,10 @@ endfunction
 function! s:OwnErrorText(sharefix_list)
     let sharefix_list = copy(a:sharefix_list)
     for sharefix in sharefix_list
-        let sharefix['text'] = sharefix['owner'].': '.sharefix['text']
+        let owner_prefix = sharefix['owner'].': '
+        if sharefix['text'] !~ '^'.owner_prefix
+            let sharefix['text'] = owner_prefix.sharefix['text']
+        endif
     endfor
     return sharefix_list
 endfunction

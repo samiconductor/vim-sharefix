@@ -41,6 +41,15 @@ function! s:tc.test_own_error_text()
     endfor
 endfunction
 
+function! s:tc.test_own_error_text_once()
+    " assert error text not prepended more than once
+    let owned_errors = self.call('s:OwnErrorText', [s:sharefix_test_list])
+    let owned_errors = self.call('s:OwnErrorText', [owned_errors])
+    for owned_error in owned_errors
+        call self.assert_not_match('^\('.owned_error['owner'].': \)\{2}', owned_error['text'])
+    endfor
+endfunction
+
 function! s:tc.teardown()
     " clear quickfix list
     call setqflist([])
