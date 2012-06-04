@@ -73,7 +73,7 @@ function! s:tc.test_filter_suffix_glob()
     SharefixFilter test*
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * 2, len(sharefix_list))
-    call self.assert_equal('tester', sort(sharefix_list)[0]['owner'])
+    call self.assert_equal('test', sort(sharefix_list)[0]['owner'])
 endfunction
 
 function! s:tc.test_filter_both_ends_glob()
@@ -81,7 +81,7 @@ function! s:tc.test_filter_both_ends_glob()
     SharefixFilter *est*
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * 2, len(sharefix_list))
-    call self.assert_equal('tester', sort(sharefix_list)[0]['owner'])
+    call self.assert_equal('test', sort(sharefix_list)[0]['owner'])
 endfunction
 
 function! s:tc.test_filter_bad_glob()
@@ -134,7 +134,7 @@ function! s:tc.test_remove_prefix_glob()
     SharefixRemove *own
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 2), len(sharefix_list))
-    call self.assert_equal('tester', sort(sharefix_list)[0]['owner'])
+    call self.assert_equal('spaces allowed', sort(sharefix_list)[0]['owner'])
 endfunction
 
 function! s:tc.test_remove_suffix_glob()
@@ -147,10 +147,10 @@ endfunction
 
 function! s:tc.test_remove_both_ends_glob()
     " remove two that match glob at both ends
-    SharefixFilter *es*
+    SharefixRemove *st*
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 2), len(sharefix_list))
-    call self.assert_equal('tester', sort(sharefix_list)[0]['owner'])
+    call self.assert_equal('own', sort(sharefix_list)[0]['owner'])
 endfunction
 
 function! s:tc.test_remove_bad_glob()
