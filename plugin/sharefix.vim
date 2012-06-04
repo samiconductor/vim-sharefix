@@ -67,7 +67,7 @@ function! Sharefix(owner, success, method, ...)
 
     " if method is string execute expression
     if type(a:method) == type('')
-        exec a:method
+        exec a:method.' '.join(a:000)
 
     " if method is a function reference call it
     elseif type(a:method) == type(function('type'))
@@ -257,7 +257,8 @@ function! s:SetSharefix(sharefix_list)
         " set quickfixes with owner names
         call setqflist(s:OwnErrorText(s:sharefix_list))
     else
-        " close quickfix list if sharefix empty
+        " clear and close quickfix list if sharefix empty
+        call setqflist([])
         cclose
     endif
 endfunction
