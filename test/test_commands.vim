@@ -68,10 +68,17 @@ function! s:tc.test_filter_suffix_glob()
     call self.assert_equal('tester', sharefix_list[0]['owner'])
 endfunction
 
+function! s:tc.test_filter_both_ends_glob()
+    " filter down to two that match glob at both ends
+    SharefixFilter *es*
+    let sharefix_list = self.get('s:sharefix_list')
+    call self.assert_equal(2 * g:sharefix_stub_len, len(sharefix_list))
+    call self.assert_equal('tester', sharefix_list[0]['owner'])
+endfunction
+
 function! s:tc.test_filter_bad_glob()
     " assert nothing changed when passing in bad wildcards
     SharefixFilter te*st
-    SharefixFilter *test*
     SharefixFilter te*st*
     SharefixFilter *te*st
     let sharefix_list = self.get('s:sharefix_list')
@@ -123,10 +130,17 @@ function! s:tc.test_remove_suffix_glob()
     call self.assert_equal('unown', sharefix_list[0]['owner'])
 endfunction
 
+function! s:tc.test_remove_both_ends_glob()
+    " remove two that match glob at both ends
+    SharefixFilter *es*
+    let sharefix_list = self.get('s:sharefix_list')
+    call self.assert_equal(2 * g:sharefix_stub_len, len(sharefix_list))
+    call self.assert_equal('tester', sharefix_list[0]['owner'])
+endfunction
+
 function! s:tc.test_remove_bad_glob()
     " assert nothing changed when passing in bad wildcards
     SharefixRemove te*st
-    SharefixRemove *test*
     SharefixRemove te*st*
     SharefixRemove *te*st
     let sharefix_list = self.get('s:sharefix_list')

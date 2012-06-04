@@ -178,32 +178,43 @@ endfunction
 
 " filter list by owner
 function! s:Filter(sharefix_list, owner, exact_filter, match_filter, all_filter)
-    " get position of any wildcard
-    let glob_pos = match(a:owner, '*')
+    let owner = a:owner
+
+    " get position of first wildcard
+    let glob1_pos = match(owner, '*')
 
     " remove the first wildcard
-    let owner = substitute(a:owner, '*', '', '')
+    let owner = substitute(owner, '*', '', '')
 
-    " display error if more than one wildcard
+    " get position of second wildcard
+    let glob2_pos = match(owner, '*')
+
+    " remove second wildcard
+    let owner = substitute(owner, '*', '', '')
+
+    " display error if more than two wildcard
     if match(owner, '*') >= 0
-        throw 'use at most one wildcard in the owner'
+        throw 'use at most two wildcards'
     endif
 
-    if glob_pos < 0
+    if glob1_pos < 0
         " no glob found
         let filter = a:exact_filter.'owner'
-    elseif glob_pos == 0 && len(owner) == 0
+    elseif glob1_pos == 0 && len(owner) == 0
         " match all - '*'
         let filter = a:all_filter
-    elseif glob_pos == 0
+    elseif glob1_pos == 0 && glob2_pos == -1
         " match end - '*owner'
         let filter = a:match_filter.'"'.owner.'$"'
-    elseif glob_pos == len(owner)
+    elseif glob1_pos == len(owner) && glob2_pos == -1
         " match beginning - 'owner*'
         let filter = a:match_filter.'"^'.owner.'"'
+    elseif glob1_pos == 0 && glob2_pos == len(owner)
+        " match both ends - '*owner*'
+        let filter = a:match_filter.'owner'
     else
-        " wildcard was not on either end
-        throw 'wildcard must be at the beginning or end of owner'
+        " wildcard was in the middle
+        throw 'wildcard must be at the beginning and/or end'
     endif
 
     return filter(copy(a:sharefix_list), filter)
@@ -235,7 +246,20 @@ endfunction
 
 " complete sharefix commands with matching owners
 function! s:SharefixComplete(arg_lead, cmd_line, cursor_pos)
-    return filter(s:GetOwners(s:sharefix_list), 'v:val =~ a:arg_lead')
+    let owner = a:arg_lead
+
+    " append suffix glob if none to show all completions
+    if owner !~ '*$'
+        let owner = owner.'*'
+    endif
+
+    try
+        let owned = s:Owned(s:sharefix_list, owner)
+    catch /wildcard/
+        let owned = []
+    endtry
+
+    return s:GetOwners(owned)
 endfunction
 
 " get list of unique owners
