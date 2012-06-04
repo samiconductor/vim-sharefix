@@ -101,11 +101,11 @@ endfunction
 
 " user commands
 if !exists(':SharefixFilter')
-    command -nargs=1 SharefixFilter :call s:SharefixFilter(<q-args>)
+    command -nargs=1 -complete=customlist,s:SharefixComplete SharefixFilter :call s:SharefixFilter(<q-args>)
 endif
 
 if !exists(':SharefixRemove')
-    command -nargs=1 SharefixRemove :call s:SharefixRemove(<q-args>)
+    command -nargs=1 -complete=customlist,s:SharefixComplete SharefixRemove :call s:SharefixRemove(<q-args>)
 endif
 
 if !exists(':SharefixClear')
@@ -231,6 +231,22 @@ function! s:Display(sharefix_list, owner)
     else
         cclose
     endif
+endfunction
+
+" complete sharefix commands with matching owners
+function! s:SharefixComplete(arg_lead, cmd_line, cursor_pos)
+    return filter(s:GetOwners(s:sharefix_list), 'v:val =~ a:arg_lead')
+endfunction
+
+" get list of unique owners
+function! s:GetOwners(sharefix_list)
+    let owners = []
+    for sharefix in a:sharefix_list
+        if empty(filter(copy(owners), "v:val == sharefix['owner']"))
+            call add(owners, sharefix['owner'])
+        endif
+    endfor
+    return owners
 endfunction
 
 " set sharefix list
