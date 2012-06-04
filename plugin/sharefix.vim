@@ -62,6 +62,12 @@ function! Sharefix(owner, success, method, ...)
         return s:ErrorMsg('sharefix owner must be a non-empty string')
     endif
 
+    " make sure passed in owner does not contain special characters
+    if a:owner =~ '[^-_[:alnum:][:space:]]\+\m'
+        return s:ErrorMsg('sharefix owner may only contain letters,
+                    \ numbers, spaces, hyphens, and underscores')
+    endif
+
     " delay redrawing screen
     setlocal lazyredraw
 

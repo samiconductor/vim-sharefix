@@ -8,7 +8,7 @@ function! s:tc.setup()
     let s:quickfix_list = getqflist()
 
     " create sharefix stub
-    let s:sharefix_test_list = SharefixStub('test', 'own')
+    let s:sharefix_test_list = SharefixStub('test', 'own', 'spaces allowed')
 endfunction
 
 function! s:tc.test_nothing_owned()
@@ -19,10 +19,11 @@ endfunction
 
 function! s:tc.test_own()
     " assert owner assigned
-    let owned = self.call('s:Own', [s:quickfix_list, 'own'])
+    let owner = 'own'
+    let owned = self.call('s:Own', [s:quickfix_list, owner])
     call self.assert_not(empty(owned))
     call self.assert_has_key('owner', owned[0])
-    call self.assert_is('own', owned[0]['owner'])
+    call self.assert_is(owner, owned[0]['owner'])
 endfunction
 
 function! s:tc.test_owned()
@@ -31,6 +32,15 @@ function! s:tc.test_owned()
     call self.assert_not(empty(owned))
     call self.assert_has_key('owner', owned[0])
     call self.assert_is('own', owned[0]['owner'])
+endfunction
+
+function! s:tc.test_owner_with_spaces()
+    " make sure getting owner with spaces works
+    let owner = 'spaces allowed'
+    let owned = self.call('s:Owned', [s:sharefix_test_list, owner])
+    call self.assert_not(empty(owned))
+    call self.assert_has_key('owner', owned[0])
+    call self.assert_is(owner, owned[0]['owner'])
 endfunction
 
 function! s:tc.test_own_error_text()

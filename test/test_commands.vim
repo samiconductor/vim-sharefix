@@ -4,7 +4,7 @@ let s:tc = unittest#testcase#new('Commands', sharefix#__context__())
 
 function! s:tc.setup()
     " create sharefix stub apply it to plugin's internal sharefix list
-    let s:owners = ['test', 'tester', 'own', 'unown']
+    let s:owners = ['test', 'tester', 'own', 'unown', 'spaces allowed']
     for owner in s:owners
         call SharefixStub(owner)
         call self.call('s:Extended', [owner])
@@ -30,6 +30,14 @@ function! s:tc.test_filter()
     call self.assert_equal('own', sharefix_list[0]['owner'])
 endfunction
 
+function! s:tc.test_filter_with_spaces()
+    " filter quickfixes by owner with spaces
+    SharefixFilter spaces allowed
+    let sharefix_list = self.get('s:sharefix_list')
+    call self.assert_equal(g:sharefix_stub_len, len(sharefix_list))
+    call self.assert_equal('spaces allowed', sharefix_list[0]['owner'])
+endfunction
+
 function! s:tc.test_filter_all()
     " match all
     SharefixFilter *
@@ -44,7 +52,7 @@ function! s:tc.test_filter_nothing()
     call self.assert_equal(g:sharefix_stub_len * len(s:owners), len(sharefix_list))
 endfunction
 
-function! s:tc.test_filter_cleared()
+function! s:tc.test_filter_when_empty()
     " nothings changes when filtering an empty sharefix list
     SharefixClear
     SharefixFilter nothing
@@ -56,24 +64,24 @@ function! s:tc.test_filter_prefix_glob()
     " filter down to two that match prefix glob
     SharefixFilter *own
     let sharefix_list = self.get('s:sharefix_list')
-    call self.assert_equal(2 * g:sharefix_stub_len, len(sharefix_list))
-    call self.assert_equal('unown', sharefix_list[0]['owner'])
+    call self.assert_equal(g:sharefix_stub_len * 2, len(sharefix_list))
+    call self.assert_equal('own', sort(sharefix_list)[0]['owner'])
 endfunction
 
 function! s:tc.test_filter_suffix_glob()
     " filter down to two that match suffix glob
     SharefixFilter test*
     let sharefix_list = self.get('s:sharefix_list')
-    call self.assert_equal(2 * g:sharefix_stub_len, len(sharefix_list))
-    call self.assert_equal('tester', sharefix_list[0]['owner'])
+    call self.assert_equal(g:sharefix_stub_len * 2, len(sharefix_list))
+    call self.assert_equal('tester', sort(sharefix_list)[0]['owner'])
 endfunction
 
 function! s:tc.test_filter_both_ends_glob()
     " filter down to two that match glob at both ends
-    SharefixFilter *es*
+    SharefixFilter *est*
     let sharefix_list = self.get('s:sharefix_list')
-    call self.assert_equal(2 * g:sharefix_stub_len, len(sharefix_list))
-    call self.assert_equal('tester', sharefix_list[0]['owner'])
+    call self.assert_equal(g:sharefix_stub_len * 2, len(sharefix_list))
+    call self.assert_equal('tester', sort(sharefix_list)[0]['owner'])
 endfunction
 
 function! s:tc.test_filter_bad_glob()
@@ -92,6 +100,13 @@ function! s:tc.test_remove()
     call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 1), len(sharefix_list))
 endfunction
 
+function! s:tc.test_remove_with_spaces()
+    " assert owner with spaces can be removed
+    SharefixRemove spaces allowed
+    let sharefix_list = self.get('s:sharefix_list')
+    call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 1), len(sharefix_list))
+endfunction
+
 function! s:tc.test_remove_all()
     " remove all quickfixes
     SharefixRemove *
@@ -106,7 +121,7 @@ function! s:tc.test_remove_nothing()
     call self.assert_equal(g:sharefix_stub_len * len(s:owners), len(sharefix_list))
 endfunction
 
-function! s:tc.test_remove_cleared()
+function! s:tc.test_remove_when_emtpy()
     " nothings changes when removing from an empty sharefix list
     SharefixClear
     SharefixRemove nothing
@@ -118,24 +133,24 @@ function! s:tc.test_remove_prefix_glob()
     " remove two that match prefix glob
     SharefixRemove *own
     let sharefix_list = self.get('s:sharefix_list')
-    call self.assert_equal(2 * g:sharefix_stub_len, len(sharefix_list))
-    call self.assert_equal('tester', sharefix_list[0]['owner'])
+    call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 2), len(sharefix_list))
+    call self.assert_equal('tester', sort(sharefix_list)[0]['owner'])
 endfunction
 
 function! s:tc.test_remove_suffix_glob()
     " remove two that match suffix glob
     SharefixRemove test*
     let sharefix_list = self.get('s:sharefix_list')
-    call self.assert_equal(2 * g:sharefix_stub_len, len(sharefix_list))
-    call self.assert_equal('unown', sharefix_list[0]['owner'])
+    call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 2), len(sharefix_list))
+    call self.assert_equal('own', sort(sharefix_list)[0]['owner'])
 endfunction
 
 function! s:tc.test_remove_both_ends_glob()
     " remove two that match glob at both ends
     SharefixFilter *es*
     let sharefix_list = self.get('s:sharefix_list')
-    call self.assert_equal(2 * g:sharefix_stub_len, len(sharefix_list))
-    call self.assert_equal('tester', sharefix_list[0]['owner'])
+    call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 2), len(sharefix_list))
+    call self.assert_equal('tester', sort(sharefix_list)[0]['owner'])
 endfunction
 
 function! s:tc.test_remove_bad_glob()
