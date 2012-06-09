@@ -19,7 +19,9 @@ endfunction
 function! s:tc.test_clear()
     " assert sharefix list is cleared
     SharefixClear
+    let sharefix_list = self.get('s:sharefix_list')
     call self.assert(empty(self.get('s:sharefix_list')))
+    call self.assert_equal([], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_filter()
@@ -27,7 +29,7 @@ function! s:tc.test_filter()
     SharefixFilter own
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len, len(sharefix_list))
-    call self.assert_equal('own', sharefix_list[0]['owner'])
+    call self.assert_equal(['own'], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_filter_with_spaces()
@@ -35,7 +37,7 @@ function! s:tc.test_filter_with_spaces()
     SharefixFilter spaces allowed
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len, len(sharefix_list))
-    call self.assert_equal('spaces allowed', sharefix_list[0]['owner'])
+    call self.assert_equal(['spaces allowed'], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_filter_all()
@@ -43,6 +45,8 @@ function! s:tc.test_filter_all()
     SharefixFilter *
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * len(s:owners), len(sharefix_list))
+    call self.assert_equal(['own', 'spaces allowed', 'test', 'tester', 'unown'],
+                \ s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_filter_nothing()
@@ -50,6 +54,8 @@ function! s:tc.test_filter_nothing()
     SharefixFilter nothing
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * len(s:owners), len(sharefix_list))
+    call self.assert_equal(['own', 'spaces allowed', 'test', 'tester', 'unown'],
+                \ s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_filter_when_empty()
@@ -58,6 +64,7 @@ function! s:tc.test_filter_when_empty()
     SharefixFilter nothing
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(0, len(sharefix_list))
+    call self.assert_equal([], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_filter_prefix_glob()
@@ -65,7 +72,7 @@ function! s:tc.test_filter_prefix_glob()
     SharefixFilter *own
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * 2, len(sharefix_list))
-    call self.assert_equal('own', sort(sharefix_list)[0]['owner'])
+    call self.assert_equal(['own', 'unown'], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_filter_suffix_glob()
@@ -73,7 +80,7 @@ function! s:tc.test_filter_suffix_glob()
     SharefixFilter test*
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * 2, len(sharefix_list))
-    call self.assert_equal('test', sort(sharefix_list)[0]['owner'])
+    call self.assert_equal(['test', 'tester'], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_filter_both_ends_glob()
@@ -81,7 +88,7 @@ function! s:tc.test_filter_both_ends_glob()
     SharefixFilter *est*
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * 2, len(sharefix_list))
-    call self.assert_equal('test', sort(sharefix_list)[0]['owner'])
+    call self.assert_equal(['test', 'tester'], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_filter_bad_glob()
@@ -91,6 +98,8 @@ function! s:tc.test_filter_bad_glob()
     SharefixFilter *te*st
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * len(s:owners), len(sharefix_list))
+    call self.assert_equal(['own', 'spaces allowed', 'test', 'tester', 'unown'],
+                \ s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_remove()
@@ -98,6 +107,8 @@ function! s:tc.test_remove()
     SharefixRemove own
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 1), len(sharefix_list))
+    call self.assert_equal(['spaces allowed', 'test', 'tester', 'unown'],
+                \ s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_remove_with_spaces()
@@ -105,6 +116,8 @@ function! s:tc.test_remove_with_spaces()
     SharefixRemove spaces allowed
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 1), len(sharefix_list))
+    call self.assert_equal(['own', 'test', 'tester', 'unown'],
+                \ s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_remove_all()
@@ -112,6 +125,7 @@ function! s:tc.test_remove_all()
     SharefixRemove *
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(0, len(sharefix_list))
+    call self.assert_equal([], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_remove_nothing()
@@ -119,6 +133,8 @@ function! s:tc.test_remove_nothing()
     SharefixRemove nothing
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * len(s:owners), len(sharefix_list))
+    call self.assert_equal(['own', 'spaces allowed', 'test', 'tester', 'unown'],
+                \ s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_remove_when_emtpy()
@@ -127,6 +143,7 @@ function! s:tc.test_remove_when_emtpy()
     SharefixRemove nothing
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(0, len(sharefix_list))
+    call self.assert_equal([], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_remove_prefix_glob()
@@ -134,7 +151,7 @@ function! s:tc.test_remove_prefix_glob()
     SharefixRemove *own
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 2), len(sharefix_list))
-    call self.assert_equal('spaces allowed', sort(sharefix_list)[0]['owner'])
+    call self.assert_equal(['spaces allowed', 'test', 'tester'], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_remove_suffix_glob()
@@ -142,7 +159,7 @@ function! s:tc.test_remove_suffix_glob()
     SharefixRemove test*
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 2), len(sharefix_list))
-    call self.assert_equal('own', sort(sharefix_list)[0]['owner'])
+    call self.assert_equal(['own', 'spaces allowed', 'unown'], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_remove_both_ends_glob()
@@ -150,7 +167,7 @@ function! s:tc.test_remove_both_ends_glob()
     SharefixRemove *st*
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * (len(s:owners) - 2), len(sharefix_list))
-    call self.assert_equal('own', sort(sharefix_list)[0]['owner'])
+    call self.assert_equal(['own', 'spaces allowed', 'unown'], s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.test_remove_bad_glob()
@@ -160,9 +177,22 @@ function! s:tc.test_remove_bad_glob()
     SharefixRemove *te*st
     let sharefix_list = self.get('s:sharefix_list')
     call self.assert_equal(g:sharefix_stub_len * len(s:owners), len(sharefix_list))
+    call self.assert_equal(['own', 'spaces allowed', 'test', 'tester', 'unown'],
+                \ s:sorted_unique_owners(sharefix_list))
 endfunction
 
 function! s:tc.teardown()
     " clear quickfix list and plugin's internal sharefix list
     SharefixClear
+endfunction
+
+function! s:sorted_unique_owners(sharefix_list)
+    let sorted = sort(map(a:sharefix_list, "v:val['owner']"))
+    let unique = []
+    for owner in sorted
+        if ' '.join(unique).' ' !~ ' '.owner.' '
+            call add(unique, owner)
+        endif
+    endfor
+    return unique
 endfunction
