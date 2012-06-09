@@ -1,0 +1,223 @@
+*sharefix.txt*  Share quickfixes among commands and functions
+
+================================================================================
+CONTENTS                                            *sharefix-content*
+
+    Intro ............................... |sharefix-intro|
+    Usage ............................... |sharefix-usage|
+        Owners .......................... |sharefix-owners|
+        Sharefix() ...................... |Sharefix()|
+        SharefixFilter .................. |SharefixFilter|
+        SharefixRemove .................. |SharefixRemove|
+        SharefixClear ................... |SharefixClear|
+    Configuration ....................... |sharefix-configuration|
+        sharefix_padding ................ |sharefix_padding|
+        sharefix_auto_open .............. |sharefix_auto_open|
+        sharefix_jump_first ............. |sharefix_jump_first|
+        sharefix_show_warnings .......... |sharefix_show_warnings|
+    Issues .............................. |sharefix-issues|
+    Contribute .......................... |sharefix-contribute|
+    Changelog ........................... |sharefix-changelog|
+    Credits ............................. |sharefix-credits|
+    License ............................. |sharefix-license|
+
+================================================================================
+INTRO                                               *sharefix-intro*
+
+Sharefix addresses the pain point of your quickfix list being wiped out
+between running different commands or functions that update the list.
+
+For example, you run your unit tests and get a list of tests that
+failed. Then when you make some changes, write the file, and your linter
+auto command kicks off and clears the list of tests. Now to fix the
+other failed tests you have to rerun all your tests.
+
+Sharefix lets you easily make your quickfix commands or functions play
+nicely together and share the list with each other.
+
+================================================================================
+USAGE                                               *sharefix-usage*
+
+Sharefix exposes a function aptly named |Sharefix()| which can be used
+to wrap any command or function that updates your quickfix list.
+
+--------------------------------------------------------------------------------
+OWNERS                                              *sharefix-owners*
+
+The |Sharefix()| function lets you associate owners with quickfixes.
+
+When commands or functions with different owners are called, their
+quickfixes are added to the quickfix list instead of blowing away the
+whole list. Or if quickfixes for that owner already exist, they are
+blown away and replaced with any new quickfixes created for that owner.
+
+Owners may contain spaces, numbers, hyphens, and underscores.
+
+--------------------------------------------------------------------------------
+Sharefix()                                          *Sharefix()*
+
+The Sharefix() function takes four arguments:
+
+    owner       the owner name to associate with this command or function
+    success     a message to display if the command or function is
+                successful, i.e. it does not produce any quickfixes
+    method      a string of the command or a function reference for a function
+    args...     optional arguments to pass to the command or function
+
+You can pass an empty string to "success" to skip displaying a message.
+Up to 20 optional arguments can be passed in to "args...".
+
+Command example~
+>
+    :call Sharefix('make test', 'All tests passed!', 'silent make', 'test')
+<
+
+Function example~
+>
+    :call Sharefix('linter', '', function('Lint'), expand('%'))
+<
+
+--------------------------------------------------------------------------------
+SharefixFilter                                      *SharefixFilter*
+
+Use this command to filter the quickfix list by owner. You can filter
+the list down to multiple matching owners using wildcards like globs.
+Wildcards can be used at the beginning, end, or both ends.
+
+The command expects a single argument so escaping spaces is unnecessary.
+
+Exact match example~
+>
+    :SharefixFilter make test
+<
+
+Wildcard example~
+>
+    :SharefixFilter make*
+<
+
+--------------------------------------------------------------------------------
+SharefixRemove                                      *SharefixRemove*
+
+Use this command to remove quickfixes from the list by owner. Wildcards
+can be used to match multiple owners just like filtering.
+
+This command also expects a single argument so escaping spaces is
+unnecessary.
+
+Exact match example~
+>
+    :SharefixRemove linter
+<
+
+Wildcard example~
+>
+    :SharefixRemove *lint*
+<
+
+--------------------------------------------------------------------------------
+SharefixClear                                       *SharefixClear*
+
+Use this command to remove all the quickfixes from the list.
+This is the same as matching all owners with |SharefixRemove|:
+>
+    SharefixRemove *
+<
+
+================================================================================
+CONFIGURATION                                       *sharefix-configuration*
+
+Sharefix can be configured by setting options in your vimrc. For example:
+>
+    let g:sharefix_padding = 5
+    let g:sharefix_jump_first = 0
+<
+
+--------------------------------------------------------------------------------
+g:sharefix_padding                                  *sharefix_padding*
+
+Set the number of lines appended after the quickfixes in the list. Set
+this to -1 to use vim's default.
+
+Default: 3
+
+--------------------------------------------------------------------------------
+g:sharefix_auto_open                                *sharefix_auto_open*
+
+Set to 0 to prevent the quickfix list from automatically opening if
+there are quickfixes to display.
+
+Default: 1 (automatically open quickfix list)
+
+--------------------------------------------------------------------------------
+g:sharefix_jump_first                               *sharefix_jump_first*
+
+Set to 0 to prevent jumping to the first quickfix location when there
+are quickfixes for the last run command or function.
+
+Default: 1 (jump to first quickfix)
+
+--------------------------------------------------------------------------------
+g:sharefix_show_warnings                            *sharefix_show_warnings*
+
+Set to 0 to hide no matching owner warning messages for |SharefixFilter|
+and |SharefixRemove| commands.
+
+Default: 1 (show warning messages)
+
+================================================================================
+ISSUES                                              *sharefix-issues*
+
+Submit any questions, comments, feature requests, or bugs to:
+
+    https://github.com/samiconductor/sharefix/issues/new
+
+================================================================================
+CONTRIBUTE                                          *sharefix-contribute*
+
+Fork this plugin at:
+
+    https://github.com/samiconductor/sharefix
+
+================================================================================
+CHANGELOG                                           *sharefix-changelog*
+
+v1.0.0
+    * Initial public offering
+
+================================================================================
+CREDITS                                             *sharefix-credits*
+
+This plugin is tested with unittest.vim:
+
+    https://github.com/h1mesuke/vim-unittest
+
+This help doc was modeled after gundo.vim:
+
+    https://github.com/sjl/gundo.vim
+
+================================================================================
+LICENSE                                             *sharefix-license*
+
+sharefix.vim - share quickfixes among commands and functions
+
+Copyright (C) 2012 Sam Simmons
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
