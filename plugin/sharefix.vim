@@ -48,9 +48,9 @@ if !exists('g:sharefix_jump_first')
     let g:sharefix_jump_first = 1
 endif
 
-" option to hide warning messages
-if !exists('g:sharefix_hide_warnings')
-    let g:sharefix_hide_warnings = 0
+" option to show warning messages
+if !exists('g:sharefix_show_warnings')
+    let g:sharefix_show_warnings = 1
 endif
 
 " store quickfixes with owners
@@ -322,7 +322,7 @@ endfunction
 
 " print warnings
 function! s:WarningMsg(message)
-    if !g:sharefix_hide_warnings
+    if g:sharefix_show_warnings
         echohl WarningMsg | echon a:message | echohl None
     endif
 endfunction
