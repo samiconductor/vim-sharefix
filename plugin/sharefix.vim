@@ -72,13 +72,17 @@ function! Sharefix(owner, success, method, ...)
     setlocal lazyredraw
 
     " if method is string execute expression
-    if type(a:method) == type('')
-        exec a:method.' '.join(a:000)
-
-    " if method is a function reference call it
-    elseif type(a:method) == type(function('type'))
-        call call(a:method, a:000)
-    endif
+    try
+        if type(a:method) == type('')
+            exec a:method.' '.join(a:000)
+        " if method is a function reference call it
+        elseif type(a:method) == type(function('type'))
+            call call(a:method, a:000)
+        endif
+    catch
+        call s:ErrorMsg(v:exception)
+        return
+    endtry
 
     " extend filtered quickfixes with new ones
     let sharefix_list = s:Extended(a:owner)
