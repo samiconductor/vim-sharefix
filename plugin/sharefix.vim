@@ -234,14 +234,20 @@ endfunction
 function! s:Display(sharefix_list, owner)
     " show list if it contains errors
     if !empty(a:sharefix_list)
-        " pad quickfix height
-        let height = len(a:sharefix_list) + g:sharefix_padding
+        " pad quickfix height if padding >= 0
+        if g:sharefix_padding >= 0
+            let height = len(a:sharefix_list) + g:sharefix_padding
+        endif
 
         " prepend owner to each error text
         call setqflist(s:OwnErrorText(a:sharefix_list))
 
         " open it
-        exec 'cclose | copen '.height
+        if exists('height')
+            exec 'cclose | copen '.height
+        else
+            exec 'cclose | copen'
+        endif
 
         " jump to first error if has owned errors
         if g:sharefix_jump_first && !empty(s:Owned(a:sharefix_list, a:owner))
