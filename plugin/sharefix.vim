@@ -1,8 +1,8 @@
 " File: sharefix.vim
 " Author: Sam Simmons <sam@samiconductor.com>
 " Description:  Share quickfix list between commands and functions
-" Last Modified: June 03, 2012
-" Version: 0.9.0
+" Last Modified: June 09, 2012
+" Version: 1.0.0
 " License: MIT License
 "
 " Copyright (c) 2012 Sam Simmons
