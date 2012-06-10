@@ -2,8 +2,9 @@
 
 Unzip
 [sharefix.zip](http://www.vim.org/scripts/script.php?script_id=4098)
-into your vim runtime or if you have pathogen installed you can clone
-the project into your runtime.
+into your vim runtime or if you have
+[pathogen](https://github.com/tpope/vim-pathogen) installed you can
+clone the project into your runtime.
 
 ## Help
 
@@ -18,9 +19,8 @@ quickfix shortcuts.
 
 ## Tests
 
-You will need the
-[unittest](https://github.com/h1mesuke/vim-unittest) plugin to run
-the tests. Use the following command to run the tests:
+You will need the [unittest](https://github.com/h1mesuke/vim-unittest)
+plugin to run the tests. Use the following command to run the tests:
 
 `:UnitTest test/test_suite.vim`
 
