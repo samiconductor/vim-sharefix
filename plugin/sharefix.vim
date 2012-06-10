@@ -71,8 +71,8 @@ function! Sharefix(owner, success, method, ...)
     " delay redrawing screen
     setlocal lazyredraw
 
-    " if method is string execute expression
     try
+        " if method is string execute expression
         if type(a:method) == type('')
             exec a:method.' '.join(a:000)
         " if method is a function reference call it
