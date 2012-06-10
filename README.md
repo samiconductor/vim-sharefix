@@ -8,7 +8,7 @@ the project into your runtime.
 ## Help
 
 See `:h sharefix` or
-[doc/sharefix.txt](https://github.com/samiconductor/vim-sharefix/doc/sharefix.txt)
+[doc/sharefix.txt](https://github.com/samiconductor/vim-sharefix/blob/master/doc/sharefix.txt)
 
 ## Companion Plugins
 
@@ -19,7 +19,7 @@ quickfix shortcuts.
 ## Tests
 
 You will need the
-[unittest.vim](https://github.com/h1mesuke/vim-unittest) plugin to run
+[unittest](https://github.com/h1mesuke/vim-unittest) plugin to run
 the tests. Use the following command to run the tests:
 
 `:UnitTest test/test_suite.vim`
