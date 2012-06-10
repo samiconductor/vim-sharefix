@@ -170,14 +170,14 @@ ISSUES                                              *sharefix-issues*
 
 Submit any questions, comments, feature requests, or bugs to:
 
-    https://github.com/samiconductor/sharefix/issues/new
+    https://github.com/samiconductor/vim-sharefix/issues/new
 
 ================================================================================
 CONTRIBUTE                                          *sharefix-contribute*
 
 Fork this plugin at:
 
-    https://github.com/samiconductor/sharefix
+    https://github.com/samiconductor/vim-sharefix
 
 ================================================================================
 CHANGELOG                                           *sharefix-changelog*
