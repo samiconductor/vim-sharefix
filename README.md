@@ -1,3 +1,16 @@
+## Description
+
+Sharefix addresses the pain point of your quickfix list being wiped out
+between running different commands or functions that update the list.
+
+For example, you run your unit tests and get a list of tests that
+failed. Then when you make some changes, write the file, and your linter
+auto command kicks off and clears the list of tests. Now to fix the
+other failed tests you have to rerun all your tests.
+
+Sharefix lets you easily make your quickfix commands or functions play
+nicely together and share the list with each other.
+
 ## Install
 
 Unzip
